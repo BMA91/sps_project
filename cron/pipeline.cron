@@ -1,0 +1,3 @@
+# Example CRON entry
+# Run the pipeline every Sunday at 02:00.
+0 2 * * 0 /bin/bash /path/to/project/run.sh -t >> /path/to/project/logs/cron.log 2>&1
