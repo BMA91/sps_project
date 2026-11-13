@@ -126,7 +126,7 @@ The Fisher test uses this 2 × 2 table:
 
 A rule is **eligible** only when both conditions are true:
 
-1. It matches at least `10` patients (`MIN_SIZE = 10`).
+1. It matches at least `100` patients (`MIN_SIZE = 100`).
 2. Its Fisher-test p-value is below the Bonferroni-corrected threshold.
 
 There are three rules, so with `alpha = 0.05`:
@@ -163,7 +163,7 @@ Read the columns like this:
   dataset.
 - A small **p-value** means that the difference is less likely to be due to
   chance according to the test.
-- **Eligible = Yes** means that the rule matched at least 10 patients and
+- **Eligible = Yes** means that the rule matched at least 100 patients and
   passed the p-value test.
 - A rule can have a large gap and still be **not eligible** if it matches too
   few patients.
@@ -266,7 +266,7 @@ Options:
 - `-d DATA_DIR`: use another data directory;
 - `-o OUT_DIR`: write results to another output directory;
 - `-f`: force a new download of the raw archive;
-- `-s`: reserved quick-sample option;
+- `-s`: analyze the first 100 cleaned rows for a quick check;
 - `-t`: run the automated tests after the analysis;
 - `-h`: display help.
 
@@ -295,6 +295,8 @@ After a successful run:
 - `results/outcome_counts.png`: number of died and living patients;
 - `results/rules_comparison.csv`: tabular results for spreadsheets;
 - `results/summary.json`: machine-readable summary;
+- `results/results_YYYYMMDD.tar.gz`: dated archive of the complete result set;
+- `results/results_YYYYMMDD.tar.gz.sha256`: checksum for the dated result archive;
 - `results/clean_clinical.tsv`: cleaned table used by the analysis;
 - `logs/run_YYYYmmdd_HHMMSS.log`: execution log.
 
@@ -372,10 +374,19 @@ The `-t` option runs these tests automatically after the analysis.
 ├── results/
 ├── logs/
 ├── cron/
-└── docs/
+├── docs/
+└── submission/
 ```
 
-## 10. Limits and responsible interpretation
+## 10. Work split
+
+- Data acquisition and checksum verification: download and pipeline shell scripts.
+- Clinical cleaning and validation: patient/sample join and outcome filtering.
+- Statistical analysis: Python rules, Fisher tests, metrics, and figures.
+- Reproducibility and testing: documentation, cron example, and automated tests.
+- Reporting: interpretation, limitations, and final submission packaging.
+
+## 11. Limits and responsible interpretation
 
 - The dataset is observational; the analysis cannot establish causation.
 - The rules are simple comparisons, not validated clinical prediction models.

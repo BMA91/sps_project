@@ -19,6 +19,16 @@ brca_metabric/
 data/extracted/
 .git-*-backup/
 
-Projet Enquête sur une maladie énoncé (1).pdf
+Projet Enquï¿½te sur une maladie ï¿½noncï¿½ (1).pdf
 
 course_sps(2).pdf
+
+# Local assignment material and generated test cache
+Projet EnquÃªte sur une maladie Ã©noncÃ© (1).pdf
+.pytest_cache/
+
+# Accidental local command-output file
+h -u origin main
+
+# Local submission artifacts
+submission/

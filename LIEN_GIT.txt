@@ -1,0 +1,5 @@
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install -r requirements.txt
+bash run.sh -tRepository: https://github.com/BMA91/sps_project
+Final commit: to be filled immediately before submission

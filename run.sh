@@ -76,7 +76,11 @@ bash "$APP_ROOT/scripts/clean.sh" -d "$DATA_DIR" -o "$OUT_DIR/clean_clinical.tsv
 
 PYTHON_BIN="$APP_ROOT/.venv/bin/python"
 
-"$PYTHON_BIN" "$APP_ROOT/scripts/analyze.py" --clean-table "$OUT_DIR/clean_clinical.tsv" --output-dir "$OUT_DIR" --min-size 10 --alpha 0.05 2>&1 | tee -a "$LOG_FILE"
+if [[ "$SMALL_SAMPLE" -eq 1 ]]; then
+  "$PYTHON_BIN" "$APP_ROOT/scripts/analyze.py" --clean-table "$OUT_DIR/clean_clinical.tsv" --output-dir "$OUT_DIR" --min-size 100 --alpha 0.05 --sample 100 2>&1 | tee -a "$LOG_FILE"
+else
+  "$PYTHON_BIN" "$APP_ROOT/scripts/analyze.py" --clean-table "$OUT_DIR/clean_clinical.tsv" --output-dir "$OUT_DIR" --min-size 100 --alpha 0.05 2>&1 | tee -a "$LOG_FILE"
+fi
 
 if [[ "$RUN_TESTS" -eq 1 ]]; then
   if [[ -d "$APP_ROOT/.venv" ]]; then
@@ -86,5 +90,14 @@ if [[ "$RUN_TESTS" -eq 1 ]]; then
   fi
   "$TEST_PYTHON" -m pytest "$APP_ROOT/scripts/tests/test_analyze.py" -q 2>&1 | tee -a "$LOG_FILE"
 fi
+
+ARCHIVE_DATE="$(date '+%Y%m%d')"
+RESULT_ARCHIVE="$OUT_DIR/results_${ARCHIVE_DATE}.tar.gz"
+RESULT_CHECKSUM="$RESULT_ARCHIVE.sha256"
+tar -czf "$RESULT_ARCHIVE" -C "$OUT_DIR" \
+  clean_clinical.tsv rules_comparison.csv summary.json report.md \
+  rule_comparison_table.png death_rates.png rule_metrics.png outcome_counts.png
+sha256sum "$RESULT_ARCHIVE" > "$RESULT_CHECKSUM"
+printf '%s [INFO] Results archived at %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$RESULT_ARCHIVE" | tee -a "$LOG_FILE"
 
 printf '%s [INFO] Pipeline completed successfully.\n' "$(date '+%Y-%m-%d %H:%M:%S')" | tee -a "$LOG_FILE"

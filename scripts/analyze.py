@@ -15,7 +15,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Analyze clinical rules for METABRIC disease risk.')
     parser.add_argument('--clean-table', required=True, help='Clean clinical TSV file')
     parser.add_argument('--output-dir', required=True, help='Directory for CSV, summary JSON and figure')
-    parser.add_argument('--min-size', type=int, default=10, help='Minimum matching patients to keep a rule')
+    parser.add_argument('--min-size', type=int, default=100, help='Minimum matching patients to keep a rule')
     parser.add_argument('--alpha', type=float, default=0.05, help='Nominal significance threshold before Bonferroni correction')
     parser.add_argument('--sample', type=int, default=None, help='Optional sample size for quick testing')
     return parser.parse_args()
@@ -81,7 +81,6 @@ def evaluate_rule(df, name, description, predicate, min_size, corrected_alpha):
     sens = 0.0 if a + c == 0 else a / (a + c)
     spec = 0.0 if b + d == 0 else d / (b + d)
     pvalue, odds = fisher_2x2(a, b, c, d)
-    corrected_alpha = 0.05 / 3.0
     eligible = (a + b) >= min_size and pvalue < corrected_alpha
     return {
         'rule': name,
@@ -265,9 +264,20 @@ def main():
     df = pd.read_csv(args.clean_table, sep='\t', dtype=str)
     df['OUTCOME'] = df['OUTCOME'].str.strip().str.lower()
     if args.sample is not None:
+        if args.sample <= 0:
+            raise SystemExit('--sample must be a positive integer.')
         df = df.head(args.sample).copy()
 
     df = df[df['OUTCOME'].isin(['died', 'living'])].copy()
+    required_columns = [
+        'AGE_AT_DIAGNOSIS', 'TUMOR_SIZE_MM', 'GRADE',
+        'LYMPH_NODES_POSITIVE', 'NPI', 'OUTCOME',
+    ]
+    missing_columns = [column for column in required_columns if column not in df.columns]
+    if missing_columns:
+        raise SystemExit(
+            'Clean table is missing required columns: ' + ', '.join(missing_columns)
+        )
     for col in ['AGE_AT_DIAGNOSIS', 'TUMOR_SIZE_MM', 'GRADE', 'LYMPH_NODES_POSITIVE', 'NPI']:
         df[col] = pd.to_numeric(df[col], errors='coerce')
     rule_definitions = [

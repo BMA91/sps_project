@@ -11,7 +11,7 @@ This log records the fixed decisions used throughout the analysis. These values 
 | Rule A | NPI above 5.4 |
 | Rule B | Grade 3 AND 4 or more positive lymph nodes |
 | Rule C | Age 60 or older AND size 25 mm or more AND grade 3 AND at least 1 positive node |
-| `MIN_SIZE` | 10 |
+| `MIN_SIZE` | 100 |
 | Significance threshold | 0.05 / number of rules (Bonferroni) |
 | Statistical test | Fisher's exact test on the 2x2 table |
 | README/report language | English |
